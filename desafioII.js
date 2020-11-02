@@ -1,96 +1,34 @@
-//llamando clases
-// import Personaje from "./personaje.js"
-import DetallesPersonajes from "./DetallesPersonajes.js"
 //funcion IIFE
-const llamadoPersonajes = (() => {
-// 3 variables privadas
-    let baseUrl, result, save
-        baseUrl = "https://rickandmortyapi.com/api/character/"
-        result = $("#user-data")
-        save
-//1 funcion asicrona privada try/catch
-    const request = async (url) => {
+const llamandopersonas = (() => {
+    async function init(){
+        const { results: users } = await getUsers()
+        console.log(users)
+        render(users)
+    }
+    async function getUsers(){
         try{
-            const results = await fetch(url);
-            save = await results.json();
-            return save;
+            const response = await fetch("https://randomuser.me/api/?results=20")
+            const resp = await response.json()
+            return resp
         }
-        catch{
-            console.log("error")
+        catch(error){
+            console.error(error)
+            return error
         }
-    }
-//2 funcion asicrona privada con try/catch
-    const getUser = async (id) => {
-        try {
-            const url = `${baseUrl}/${id}`;
-            Promise.all([request(url)])
-            .then(resp2 => {
-                let d2 = new DetallesPersonajes(`${resp2[0].id}`,`${resp2[0].name}`,`${resp2[0].status}`,`${resp2[0].species}`,`${resp2[0].gender}`,`${resp2[0].created}`,`${resp2[0].origin.name}`,`${resp2[0].location.name}`,`${resp2[0].episode.length}`)
-                d2.infoGeneral()
-                let info = d2.infoModal()
-                printInfoModal(info)
-                //modal
-                function printInfoModal(data){
-                    let result = $(".resultados")
-                    let primero = $('<div class="cartas"></div>')
-                    let segundo = $(`<div class="modal fade" id="pj${id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"></div>`);
-                    let tercero = $('<div class="modal-dialog" role="document"></div>')
-                    let cuarto = $('<div class="modal-content"></div>')
-                    let quinto1 = $('<div class="modal-header"></div>')
-                    let quinto2 = $('<div class="modal-body"></div>')
-                    let boton1 = $('<button type="button" class="close" data-dismiss="modal" aria-label="Close">')
-                    let boton2 = $('<span aria-hidden="true">&times;</span>')
-                    let userUl = $('<ul class="col-12" style="list-style-type: none; margin: 0;margin-top: 50px;"></ul>');
-                    ["id", "name", "status", "species", "gender", "created", "origin", "location", "episode"].forEach(element => {
-                        userUl.append($(`<li style="font-size:160%;"></li>`).append(data[element]))
-                    });
-                    ["name"].forEach(element => {
-                        quinto1.append($(`<p></p>`).append(data[element]))
-                    });
-                    cuarto.append(quinto1)
-                    boton1.append(boton2)
-                    quinto1.append(boton1)
-                    quinto2.append(userUl)
-                    cuarto.append(quinto2)
-                    tercero.append(cuarto)
-                    segundo.append(tercero)
-                    primero.append(segundo)
-                    result.append(primero)
-                }
-            })
-            .catch(err => console.log('err', err))
-        }
-        catch{
-            console.log("error")
-        }
-    }
-    return {
-        //1 funcion publica asicrona dentro del retorno
-        request: async () => {
-            let j = 1
-            Promise.all([request(baseUrl + "?page=" + j)])
-            .then(resp => {
-                for (let id = 1; id < 21; id++){
-                    //colocar imagenes
-                    let firstCol = $(`<div class="col-md-4" style="padding-top:50px"></div>`)
-                    let userInfo = $('<div></div>');
-                    userInfo.append(`<button type="button" style="float:left" class="btn col-6" id="imagen${id}" data-toggle="modal" data-target="#pj${id}"><img src="${resp[0].results[id-1].image}" style="width:110px;"></button>`)
-                    getUser(id, userInfo)
-                    firstCol.append(userInfo)
-                    result.append(firstCol)
-                }
-            })
-            .catch(err => console.log('err', err))
-        },
-        //2 funcion publica dentro del retorno
-        getdelete: () => {
-            $("div").removeClass("spinner-border");
-            $("#cantidadPersonajes").append(`${save.id}`)
-        }
-    }
+}
+function render(users){
+    const user_data = document.querySelector("#user-data")
+    const html = users.map(user => `<li>
+    <p><strong>Nombre:</strong> ${user.name.first} ${user.name.last}<p>
+    <p><strong>Nombre:</strong> ${user.phonet}<p>
+    <p><strong>Nombre:</strong> ${user.email}<p>
+    <img src="${user.picture.large}">
+    </li>`)
+
+const user_data_ul = document.createElement("ul")
+user_data_ul.innerHTML = html.join(" ")
+user_data.appendChild(user_data_ul)
+}
+return { init }
 })()
-//llamando funciones puclicas dentro de la privada
-llamadoPersonajes.request()
-setTimeout(() => {
-llamadoPersonajes.getdelete()
-}, 2000)
+llamandopersonas.init()
